@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Security.KeyVault.Secrets;
+using Microsoft.AspNetCore.Mvc;
 using MvcCoreKeyVault.Models;
 using System.Diagnostics;
 
@@ -6,15 +7,22 @@ namespace MvcCoreKeyVault.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        //Inyectamos secretclient
+        private SecretClient secretClient;
+        public HomeController(SecretClient secretClient)
         {
-            _logger = logger;
+            this.secretClient = secretClient;
         }
 
         public IActionResult Index()
         {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> Index(string secretkey)
+        {
+            KeyVaultSecret secret = await this.secretClient.GetSecretAsync(secretkey);
+            ViewData["SECRETO"] = secret.Value;
             return View();
         }
 
